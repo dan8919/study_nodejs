@@ -3,7 +3,7 @@
 var express = require("express");
 var static = require("serve-static");
 var path = require("path");
-var bodyParser = require("body-parser");
+var bodyParser = require("body-parser"); /*body-parser 내부모듈*/
 
 var app = express();
 
@@ -12,7 +12,7 @@ app.use(static(path.join(__dirname,"public")));
 
 /* bodyparser관련    https://velog.io/@yejinh/express-%EB%AF%B8%EB%93%A4%EC%9B%A8%EC%96%B4-bodyParser-%EB%AA%A8%EB%93%88 */
 app.use(bodyParser.urlencoded({extend:false}));
-app.use(bodyParser.json());
+app.use(bodyParser.json());  /*객체로 나옴 서버 내에서 해석 가능한 형태로 변형*/
 
 
 
