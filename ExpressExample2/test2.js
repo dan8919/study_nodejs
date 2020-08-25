@@ -4,6 +4,7 @@ var path = require("path");
 var bodyParse = require("body-parser");
 var expressSession = require("express-session");
 var fs = require("fs");
+var nodemailer = require("nodemailer"); 
 
 
 var app = express();
@@ -19,6 +20,72 @@ app.use(expressSession({
 }));
 
 var router =express.Router();
+
+/*이메일 관련*/
+router.route("/user/email").post(function(req,res){
+    console.log("/user/email call");
+    
+    var sender=req.body.sender;
+    var senderpw=req.body.senderpw;
+    var receiver=req.body.receiver;
+    var subject=req.body.subject;
+    var content=req.body.content;
+    
+    /*어디에서 누가 발송할건지*/
+    
+   var transporter = nodemailer.createTransport({
+       service:"Naver",  /*smtp 메일 발송 서버*/
+       host:"smtp.naver.com",
+       port:587,
+       secure:false,
+       auth:{
+           user:sender,
+           pass:senderpw
+       }
+   });
+    
+    var mailOptions ={
+        from:sender,
+        to:receiver,
+        subject:subject,
+        text:content
+    };
+    
+    
+   /*이메일 발송*/ 
+    transporter.sendMail(mailOptions,function(err,info){
+        if(err){
+            console.log(err);
+            return;
+        }
+        res.send("발송 성공")
+    })
+    
+    
+    
+})
+
+
+/*router 안에 router 들어가면 안됨! 주의*/
+
+router.route("/user/email").get(function(req,res){
+        console.log("/user/email call");
+    
+     /*로그인 안 되어있으면 로그인 화면으로 이동*/
+    if(req.session.user){
+        fs.readFile("./email2.html","utf-8",function(err,data){
+            res.send(data);
+        });
+        
+    }else{
+        res.redirect("/login2.html");
+    }
+  });
+    
+    
+
+
+
 
 router.route("/user/login").post(function(req,res){
     console.log("/user/login call");
