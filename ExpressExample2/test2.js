@@ -48,6 +48,9 @@ router.route("/user/login").post(function(req,res){
 
     router.route("/user/product").get(function(req,res){
         console.log("/user/product call");
+        
+        
+        
      /*로그인 안 되어있으면 로그인 화면으로 이동*/
     if(req.session.user){
         fs.readFile("./product.html","utf-8",function(err,data){
@@ -58,6 +61,28 @@ router.route("/user/login").post(function(req,res){
         res.redirect("/login2.html");
     }
                                       });
+
+
+/* 로그아웃 */
+
+router.route("/user/logout").get(function(req,res){
+    console.log("/user/logout call");
+    
+    if(req.session.user){
+        req.session.destroy(function(err){
+            if(err){
+                    console.log("세션 삭제 중 에러 발생");
+                return;
+            }
+            console.log("세션 삭제 성공");
+             res.redirect("/login2.html");
+        })
+        
+    }else{
+        console.log("로그인이 되어있지 않음");
+        res.redirect("/login2.html");
+    }
+});
 
 app.use("/",router);
 
