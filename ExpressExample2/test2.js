@@ -5,10 +5,12 @@ var bodyParse = require("body-parser");
 var expressSession = require("express-session");
 var fs = require("fs");
 var nodemailer = require("nodemailer"); 
+var multer = require("multer");
 
 
 var app = express();
 app.use(static(path.join(__dirname,"public")));
+app.use("/upload2",static(path.join(__dirname,"upload2")));
 app.use(bodyParse.urlencoded({extended:false}));
 app.use(bodyParse.json());
 
@@ -19,7 +21,53 @@ app.use(expressSession({
         saveUnintialized:true
 }));
 
+/*어디에 저장할 건지*/
+var storage = multer.diskStorage({
+    destination:function(req,file,callback){
+    callback(null,"upload2");
+},
+    filename:function(req,file,callback)
+    {
+        callback(null,
+                 Date.now()+"__"+file.originalname);
+    }
+});
+
+var upload = multer({
+   storage:storage,
+    limits:{
+        files:10,
+        fileSize:1024*1024*10      /*10M*/
+    }
+});
+
+
 var router =express.Router();
+
+/*html 에서 file 이라함*/
+router.route("/process/upload").post(upload.array("file",1),
+                                     function(req,res){
+    console.log("/process/upload call");
+    console.log(req.files);
+    console.log(req.body.id);
+    
+    var files =req.files;
+    
+    var id = req.body.id;
+    var orgname = files[0].originalname;
+    var filename =files[0].filename;
+    
+    res.send(`
+        <h1>파일 업로드 성공</h1>
+        <p>ID:${id}</p>
+        <p>orgname:${orgname}</p>
+        <p>filename:${filename}</p>
+        <img src="/upload2/${filename}">
+
+`);
+    
+})
+
 
 /*이메일 관련*/
 router.route("/user/email").post(function(req,res){
